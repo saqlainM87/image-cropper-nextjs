@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "contentful-management": "^10.3.1",
     "next": "12.1.6",
     "react": "18.1.0",
     "react-cropper": "^2.1.8",
