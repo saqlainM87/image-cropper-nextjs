@@ -50,24 +50,22 @@ class Contentful {
         return this.environment;
     }
 
-    public uploadFile = async (fileBlob: Blob) => {
+    public uploadFile = async (fileBlob: Blob, fileName: string) => {
         const environment = this.environment ?? (await this.setEnvironment());
 
         if (environment) {
-            const currentTime = Date.now();
-
             const asset = await environment.createAssetFromFiles({
                 fields: {
                     title: {
-                        'en-US': `Asset_${currentTime}`,
+                        'en-US': `Asset_${fileName}`,
                     },
                     description: {
-                        'en-US': `Asset_${currentTime} Description`,
+                        'en-US': `Asset_${fileName} Description`,
                     },
                     file: {
                         'en-US': {
                             contentType: 'image/jpeg',
-                            fileName: 'cropped_image.jpeg',
+                            fileName: fileName,
                             file: await fileBlob.arrayBuffer(),
                         },
                     },

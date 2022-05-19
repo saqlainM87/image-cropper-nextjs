@@ -1,17 +1,16 @@
 import { useState } from 'react';
 import { NextPage } from 'next';
-import Cropper from 'react-cropper';
 import Image from 'next/image';
 
-import 'cropperjs/dist/cropper.css';
-
 import { contentfulInstance } from '../../libs/contentful';
+import { ImageCropper } from '../../components/ImageCropper';
 
 export const CropImage: NextPage = () => {
     const [image, setImage] = useState('');
     const [cropData, setCropData] = useState('');
     const [cropper, setCropper] = useState<Cropper>();
     const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
+    const [fileName, setFileName] = useState('');
 
     const onChange = (e: any) => {
         e.preventDefault();
@@ -36,6 +35,8 @@ export const CropImage: NextPage = () => {
     };
 
     const getCropData = () => {
+        setFileName(`cropped_image_${new Date().toISOString()}`);
+
         if (typeof cropper !== 'undefined') {
             const croppedCanvas = cropper.getCroppedCanvas({
                 maxWidth: 4096,
@@ -70,7 +71,7 @@ export const CropImage: NextPage = () => {
 
     const handleDownload = () => {
         if (croppedBlob) {
-            downloadCroppedImage(croppedBlob, `cropped_image`);
+            downloadCroppedImage(croppedBlob, fileName);
         }
     };
 
@@ -78,7 +79,8 @@ export const CropImage: NextPage = () => {
         if (croppedBlob) {
             try {
                 const uploadedAsset = await contentfulInstance.uploadFile(
-                    croppedBlob
+                    croppedBlob,
+                    fileName
                 );
 
                 if (uploadedAsset) {
@@ -95,39 +97,31 @@ export const CropImage: NextPage = () => {
     };
 
     return (
-        <div className="container mx-auto h-screen flex justify-center items-center">
+        <div className="container mx-auto py-8 flex justify-center">
             <div className="bg-orange-100 w-3/4 flex flex-col items-center rounded">
-                <div className="w-4/5 mt-48 mb-8 flex flex-col items-center">
-                    <input
-                        name="image"
-                        className="w-1/3 my-4"
-                        type="file"
-                        onChange={onChange}
-                        accept="image/*"
-                    />
-                    <Cropper
-                        className="px-4"
-                        zoomTo={0.25}
-                        dragMode="move"
-                        initialAspectRatio={1.78}
-                        aspectRatio={1.78}
-                        preview=".img-preview"
-                        src={image}
-                        viewMode={1}
-                        minCropBoxHeight={10}
-                        minCropBoxWidth={10}
-                        background={false}
-                        responsive={true}
-                        autoCropArea={1}
-                        checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
-                        onInitialized={(instance) => {
-                            setCropper(instance);
-                        }}
-                        guides={true}
-                        minContainerHeight={400}
-                        minContainerWidth={400}
-                    />
-                </div>
+                <ImageCropper
+                    zoomTo={0.75}
+                    dragMode="move"
+                    preview=".img-preview"
+                    src={image}
+                    viewMode={1}
+                    minCropBoxHeight={10}
+                    minCropBoxWidth={10}
+                    background={false}
+                    responsive={true}
+                    autoCropArea={0.5}
+                    checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
+                    onInitialized={(instance) => {
+                        setCropper(instance);
+                    }}
+                    guides={true}
+                    minContainerHeight={400}
+                    minContainerWidth={400}
+                    onChange={onChange}
+                    image={image}
+                    instance={cropper}
+                />
+
                 <div className="w-1/2 flex justify-center mb-4">
                     <div className="w-1/2 pr-2 flex flex-col items-center">
                         <h1 className="text-center">Preview</h1>
