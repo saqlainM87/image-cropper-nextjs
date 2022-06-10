@@ -65,7 +65,7 @@ class Contentful {
                     file: {
                         'en-US': {
                             contentType: 'image/jpeg',
-                            fileName: fileName,
+                            fileName: `${fileName}.jpeg`,
                             file: await fileBlob.arrayBuffer(),
                         },
                     },
