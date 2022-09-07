@@ -1,9 +1,9 @@
+import { RcFile } from 'antd/lib/upload';
 import { ReactCropperProps } from 'react-cropper';
 
 export interface ImageCropperProps extends ReactCropperProps {
-    onChange: (e: any) => void;
-    image: string;
-    instance?: Cropper;
+    onFileSelect?: (file?: RcFile) => void;
+    mode?: CropModes;
 }
 
 export enum CropModes {

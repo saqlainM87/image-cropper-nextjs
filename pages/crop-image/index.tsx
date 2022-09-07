@@ -4,6 +4,8 @@ import Image from 'next/image';
 
 import { contentfulInstance } from '../../libs/contentful';
 import { ImageCropper } from '../../components/ImageCropper';
+import { UploadFile } from 'antd';
+import { RcFile } from 'antd/lib/upload';
 
 export const CropImage: NextPage = () => {
     const [image, setImage] = useState('');
@@ -12,16 +14,11 @@ export const CropImage: NextPage = () => {
     const [croppedBlob, setCroppedBlob] = useState<Blob | null>(null);
     const [fileName, setFileName] = useState('');
 
-    const onChange = (e: any) => {
-        e.preventDefault();
-
+    const onChange = (file?: RcFile) => {
         try {
-            let files;
-
-            if (e.dataTransfer) {
-                files = e.dataTransfer.files;
-            } else if (e.target) {
-                files = e.target.files;
+            if (!file) {
+                setImage('');
+                return;
             }
 
             const reader = new FileReader();
@@ -30,7 +27,7 @@ export const CropImage: NextPage = () => {
                 setImage(reader.result as any);
             };
 
-            reader.readAsDataURL(files[0]);
+            reader.readAsDataURL(file);
         } catch (error) {}
     };
 
@@ -100,26 +97,25 @@ export const CropImage: NextPage = () => {
         <div className="container mx-auto py-8 flex justify-center">
             <div className="bg-orange-100 w-3/4 flex flex-col items-center rounded">
                 <ImageCropper
-                    zoomTo={0.75}
+                    zoomTo={0.4}
                     dragMode="move"
                     preview=".img-preview"
-                    src={image}
+                    // src={image}
                     viewMode={1}
                     minCropBoxHeight={10}
                     minCropBoxWidth={10}
                     background={false}
                     responsive={true}
-                    autoCropArea={0.5}
+                    autoCropArea={0.7}
                     checkOrientation={false} // https://github.com/fengyuanchen/cropperjs/issues/671
-                    onInitialized={(instance) => {
-                        setCropper(instance);
-                    }}
-                    guides={true}
-                    minContainerHeight={400}
-                    minContainerWidth={400}
-                    onChange={onChange}
-                    image={image}
-                    instance={cropper}
+                    // onInitialized={(instance) => {
+                    //     setCropper(instance);
+                    // }}
+                    guides={false}
+                    minContainerHeight={200}
+                    minContainerWidth={200}
+                    // onFileSelect={onChange}
+                    // instance={cropper}
                 />
 
                 <div className="w-1/2 flex justify-center mb-4">
