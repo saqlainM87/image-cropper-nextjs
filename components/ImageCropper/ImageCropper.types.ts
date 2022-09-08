@@ -1,9 +1,12 @@
 import { RcFile } from 'antd/lib/upload';
+import { ReactElement } from 'react';
 import { ReactCropperProps } from 'react-cropper';
 
 export interface ImageCropperProps extends ReactCropperProps {
     onFileSelect?: (file?: RcFile) => void;
     mode?: CropModes;
+    anchorElement?: ReactElement;
+    uploadHandler?: (file: Blob | null) => Promise<void>;
 }
 
 export enum CropModes {

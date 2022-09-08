@@ -3,9 +3,9 @@ import { NextPage } from 'next';
 import Image from 'next/image';
 
 import { contentfulInstance } from '../../libs/contentful';
-import { ImageCropper } from '../../components/ImageCropper';
-import { UploadFile } from 'antd';
+import { ImageCropperModal } from '../../components/ImageCropper';
 import { RcFile } from 'antd/lib/upload';
+import axios from 'axios';
 
 export const CropImage: NextPage = () => {
     const [image, setImage] = useState('');
@@ -96,7 +96,7 @@ export const CropImage: NextPage = () => {
     return (
         <div className="container mx-auto py-8 flex justify-center">
             <div className="bg-orange-100 w-3/4 flex flex-col items-center rounded">
-                <ImageCropper
+                <ImageCropperModal
                     zoomTo={0.4}
                     dragMode="move"
                     preview=".img-preview"
@@ -116,6 +116,46 @@ export const CropImage: NextPage = () => {
                     minContainerWidth={200}
                     // onFileSelect={onChange}
                     // instance={cropper}
+                    // anchorElement={
+                    //     <button>
+                    //         <input
+                    //             name="image"
+                    //             className="w-1/3 my-4"
+                    //             type="file"
+                    //             accept="image/*"
+                    //             hidden
+                    //         />
+                    //         Upload
+                    //     </button>
+                    // }
+                    uploadHandler={async (file) => {
+                        console.log(file);
+
+                        if (!file) {
+                            return;
+                        }
+
+                        const formData = new FormData();
+
+                        formData.append('file', file, 'file');
+
+                        try {
+                            return await axios.post(
+                                '/api/file-upload',
+                                formData,
+                                {
+                                    onUploadProgress: (progressEvent) => {
+                                        const percentCompleted = Math.round(
+                                            (progressEvent.loaded * 100) /
+                                                progressEvent.total
+                                        );
+
+                                        console.log(percentCompleted);
+                                    },
+                                }
+                            );
+                        } catch (error) {}
+                    }}
                 />
 
                 <div className="w-1/2 flex justify-center mb-4">

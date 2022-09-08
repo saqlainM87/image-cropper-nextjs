@@ -1,14 +1,13 @@
-.imageCropperWrapper {
-    min-width: 75%;
-}
-
 .cropperWrapper {
     display: flex;
     justify-content: center;
-    max-width: 245px;
-    max-height: 245px;
 
     :global {
+        .cropperContainer {
+            max-width: 245px;
+            max-height: 245px;
+        }
+
         .cropper-point {
             opacity: 0;
         }
@@ -55,4 +54,20 @@
             );
         }
     }
+}
+
+.zoomSlider {
+    :global {
+        .ant-slider-handle {
+            border-radius: 0;
+            width: 14px;
+            height: 14px;
+        }
+    }
+}
+
+.rotateIcon {
+    display: flex !important;
+    font-size: 1.375rem;
+    line-height: 1.375rem;
 }

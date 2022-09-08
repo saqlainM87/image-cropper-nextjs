@@ -1,17 +1,32 @@
 import { ReactElement, useCallback, useEffect, useState } from 'react';
 import { Cropper } from 'react-cropper';
-import { Button, Col, message, Modal, Row, Upload, UploadProps } from 'antd';
-import { InboxOutlined, UploadOutlined } from '@ant-design/icons';
+import {
+    Button,
+    Col,
+    message,
+    Modal,
+    Row,
+    Slider,
+    Upload,
+    UploadProps,
+} from 'antd';
+import {
+    InboxOutlined,
+    RotateRightOutlined,
+    UploadOutlined,
+} from '@ant-design/icons';
+import { RcFile } from 'antd/lib/upload';
 
 import 'cropperjs/dist/cropper.css';
 
 import { CropModes, ImageCropperProps } from './ImageCropper.types';
 import styles from './ImageCropper.module.scss';
-import { RcFile } from 'antd/lib/upload';
 
-export const ImageCropper = ({
+export const ImageCropperModal = ({
     onFileSelect,
     mode = CropModes.AVATAR,
+    anchorElement,
+    uploadHandler,
     ...props
 }: ImageCropperProps): ReactElement => {
     const [open, setOpen] = useState(false);
@@ -24,7 +39,6 @@ export const ImageCropper = ({
 
     const hideModal = () => {
         setOpen(false);
-        cropperInstance?.destroy(); // Destroy the current cropperJs instance
 
         // Clear the file state
         if (onFileSelect) {
@@ -66,8 +80,7 @@ export const ImageCropper = ({
 
     const handleChange = (file?: RcFile) => {
         if (!file) {
-            setImage('');
-            return;
+            return setImage('');
         }
 
         const reader = new FileReader();
@@ -110,7 +123,28 @@ export const ImageCropper = ({
         showUploadList: false,
     };
 
+    const handleOk = () => {
+        if (typeof cropperInstance !== 'undefined') {
+            const croppedCanvas = cropperInstance.getCroppedCanvas({
+                maxWidth: 4096,
+                maxHeight: 4096,
+                fillColor: '#fff',
+                imageSmoothingEnabled: true,
+                imageSmoothingQuality: 'high',
+            });
+
+            croppedCanvas?.toBlob(
+                (blob) => {
+                    uploadHandler?.(blob);
+                },
+                'image/jpeg',
+                1
+            );
+        }
+    };
+
     const { Dragger } = Upload;
+    const currentImage = props.src || image;
 
     return (
         <div
@@ -125,35 +159,70 @@ export const ImageCropper = ({
             /> */}
 
             <div className="my-4">
-                <Button onClick={showModal} icon={<UploadOutlined />}>
-                    Upload picture
-                </Button>
+                {anchorElement ? (
+                    <span onClick={showModal}>{anchorElement}</span>
+                ) : (
+                    <Button onClick={showModal} icon={<UploadOutlined />}>
+                        Upload picture
+                    </Button>
+                )}
             </div>
 
             <Modal
                 title="Upload your profile picture"
                 open={open}
-                onOk={hideModal}
+                // onOk={hideModal}
                 onCancel={hideModal}
-                okButtonProps={{ hidden: true }}
+                okButtonProps={{ hidden: !currentImage }}
                 cancelButtonProps={{ hidden: true }}
+                okText="Upload image"
+                onOk={handleOk}
             >
-                {props.src || image ? (
-                    <Row justify="center">
-                        <Col>
+                {currentImage ? (
+                    <Row justify="center" gutter={[0, 12]}>
+                        <Col xs={24} className={styles.cropperWrapper}>
                             <Cropper
-                                className={`${styles.cropperWrapper} ${
+                                className={`cropperContainer ${
                                     mode === CropModes.AVATAR
                                         ? styles.cropperAvatar
                                         : ''
                                 }`}
                                 {...props}
-                                src={props.src || image}
+                                src={currentImage}
                                 onInitialized={(instance) => {
                                     setCropperInstance(instance); // For internal use
                                     props.onInitialized?.(instance); // For external use
                                 }}
                             />
+                        </Col>
+                        <Col xs={18}>
+                            <Row align="middle" gutter={[12, 0]}>
+                                <Col xs={20}>
+                                    <Slider
+                                        className={styles.zoomSlider}
+                                        step={0.1}
+                                        max={1}
+                                        defaultValue={0.4}
+                                        onChange={(value) => {
+                                            cropperInstance?.zoomTo(value);
+                                        }}
+                                    />
+                                </Col>
+
+                                <Col>
+                                    <Button
+                                        onClick={() => {
+                                            cropperInstance?.rotate(90);
+                                        }}
+                                        type="text"
+                                        icon={
+                                            <span className={styles.rotateIcon}>
+                                                <RotateRightOutlined />
+                                            </span>
+                                        }
+                                    />
+                                </Col>
+                            </Row>
                         </Col>
                     </Row>
                 ) : (
